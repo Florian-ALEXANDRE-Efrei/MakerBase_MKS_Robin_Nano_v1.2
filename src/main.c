@@ -1,4 +1,5 @@
 #include "stm32f1xx_hal.h"
+#include "shell/shell.h"
 
 void SysTick_Handler(void) { HAL_IncTick(); }   // indispensable : pas de stm32f1xx_it.c
 
@@ -44,15 +45,12 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
 
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    GPIO_InitTypeDef g = {0};
-    g.Pin   = GPIO_PIN_10;
-    g.Mode  = GPIO_MODE_OUTPUT_PP;
-    g.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOB, &g);
+    shell_init(115200);                          // USART3 : PB10 (TX) est aussi la LED D7
+    shell_printf("\nShell pret, SYSCLK = %lu Hz\n", (unsigned long)HAL_RCC_GetSysClockFreq());
 
+    uint32_t n = 0;
     while (1) {
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_10);  // LED TX
+        shell_printf("tick %lu (uptime %lu ms)\n", (unsigned long)n++, (unsigned long)HAL_GetTick());
         HAL_Delay(500);
     }
 }
