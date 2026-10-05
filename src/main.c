@@ -1,6 +1,7 @@
 #include "stm32f1xx_hal.h"
 #include "shell/shell.h"
 #include "motor/motor.h"
+#include "commands.h"
 
 void SysTick_Handler(void) { HAL_IncTick(); } // indispensable : pas de stm32f1xx_it.c
 
@@ -26,6 +27,8 @@ static void SystemClock_Config(void)
     clk.APB2CLKDivider = RCC_HCLK_DIV1;
     HAL_RCC_ClockConfig(&clk, FLASH_LATENCY_2);
 }
+
+/* ================================ SHELL CMD ========================================= */
 
 int main(void)
 {
@@ -53,15 +56,10 @@ int main(void)
     motor_init(); // moteurs désactivés ; JTAG coupé pour libérer PB4
     shell_printf("Moteurs prets (desactives)\n");
     motor_enable(MOTOR_Z, 1);
-    
-    uint32_t n = 0;
+
+    commands_init();
     while (1)
     {
-        motor_move(MOTOR_Z, 400, 800); // 400 pas à 800 pas/s
-        motor_wait(MOTOR_Z);
-        shell_printf("position = %ld\n", (long)motor_position(MOTOR_Z));
-        // motor_enable(MOTOR_Z, 0);
-        shell_printf("tick %lu (uptime %lu ms)\n", (unsigned long)n++, (unsigned long)HAL_GetTick());
-        HAL_Delay(500);
+        shell_poll();
     }
 }
